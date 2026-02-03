@@ -1,16 +1,17 @@
 """Platform adapters."""
 
 from .base import BaseAdapter
-from .youtube_adapter import YouTubeAdapter
-from .x_adapter import XAdapter
-from .linkedin_adapter import LinkedInAdapter
-from .tiktok_adapter import TikTokAdapter
 from .instagram_adapter import InstagramAdapter
-from .twitch_adapter import TwitchAdapter
-from .snapchat_adapter import SnapchatAdapter
-from .pinterest_adapter import PinterestAdapter
 from .kick_adapter import KickAdapter
+from .linkedin_adapter import LinkedInAdapter
+from .pinterest_adapter import PinterestAdapter
+from .registry import register_adapter
+from .snapchat_adapter import SnapchatAdapter
 from .telegram_adapter import TelegramAdapter
+from .tiktok_adapter import TikTokAdapter
+from .twitch_adapter import TwitchAdapter
+from .x_adapter import XAdapter
+from .youtube_adapter import YouTubeAdapter
 
 __all__ = [
     "BaseAdapter",
@@ -25,3 +26,17 @@ __all__ = [
     "KickAdapter",
     "TelegramAdapter",
 ]
+
+for adapter_class in (
+    YouTubeAdapter,
+    XAdapter,
+    LinkedInAdapter,
+    TikTokAdapter,
+    InstagramAdapter,
+    TwitchAdapter,
+    SnapchatAdapter,
+    PinterestAdapter,
+    KickAdapter,
+    TelegramAdapter,
+):
+    register_adapter(adapter_class)

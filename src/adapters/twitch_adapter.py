@@ -6,6 +6,7 @@ from importlib.util import find_spec
 from typing import Any, Dict
 
 from src.adapters.base import BaseAdapter
+from src.runtime.results import ResultStatus
 
 
 class TwitchAdapter(BaseAdapter):
@@ -15,24 +16,20 @@ class TwitchAdapter(BaseAdapter):
     MAX_TEXT_LENGTH = 140
     REQUIRED_FIELDS = ("client_id", "client_secret", "access_token")
 
-    def dispatch(self, payload: Dict[str, Any]) -> Dict[str, Any]:
-        if not self.live_mode:
-            return self._dry_run_response("Ready to post to Twitch.", payload)
+    def dispatch(self, payload: Dict[str, Any]):
         if not self._require_credentials():
-            return {
-                "status": "ERROR",
-                "detail": "Missing Twitch credentials. Set TWITCH_CLIENT_ID, TWITCH_CLIENT_SECRET, TWITCH_ACCESS_TOKEN.",
-            }
+            return self._result(
+                ResultStatus.FAILED,
+                "Missing Twitch credentials. Set TWITCH_CLIENT_ID, TWITCH_CLIENT_SECRET, TWITCH_ACCESS_TOKEN.",
+            )
 
         if not find_spec("twitchAPI"):
-            return {
-                "status": "ERROR",
-                "detail": "twitchAPI is not installed. Install it to dispatch to Twitch.",
-            }
+            return self._result(
+                ResultStatus.FAILED,
+                "twitchAPI is not installed. Install it to dispatch to Twitch.",
+            )
 
-        return {
-            "status": "SUCCESS",
-            "detail": "Ready to post to Twitch via twitchAPI (configure API calls).",
-            "payload": payload.get("payload", {}),
-            "monetization_hint": payload.get("monetization_hint"),
-        }
+        return self._result(
+            ResultStatus.NOT_IMPLEMENTED,
+            "Twitch dispatch not implemented. Integrate twitchAPI client calls.",
+        )

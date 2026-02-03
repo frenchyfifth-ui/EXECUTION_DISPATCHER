@@ -8,37 +8,14 @@ import os
 from pathlib import Path
 from typing import Dict, Iterable, List
 
-from src.adapters import (
-    InstagramAdapter,
-    KickAdapter,
-    LinkedInAdapter,
-    PinterestAdapter,
-    SnapchatAdapter,
-    TelegramAdapter,
-    TikTokAdapter,
-    TwitchAdapter,
-    XAdapter,
-    YouTubeAdapter,
-)
+import src.adapters  # noqa: F401 - ensure adapters register
+from src.adapters.registry import resolve_adapter
 from src.runtime.models import ExecutionEvent
+from src.runtime.results import DispatchResult, ResultStatus
 
 LOG_FILE = Path("logs/execution.log")
 CANONICAL_DIR = Path("canonical")
 NORMALIZED_DIR = Path("normalized")
-
-PLATFORM_ADAPTERS = {
-    "YOUTUBE": YouTubeAdapter,
-    "X": XAdapter,
-    "LINKEDIN": LinkedInAdapter,
-    "TIKTOK": TikTokAdapter,
-    "INSTAGRAM": InstagramAdapter,
-    "TWITCH": TwitchAdapter,
-    "SNAPCHAT": SnapchatAdapter,
-    "PINTEREST": PinterestAdapter,
-    "KICK": KickAdapter,
-    "TELEGRAM": TelegramAdapter,
-}
-
 
 def setup_logging() -> logging.Logger:
     """Configure console and file logging."""
@@ -52,6 +29,7 @@ def setup_logging() -> logging.Logger:
 
     console_handler = logging.StreamHandler()
     console_handler.setFormatter(formatter)
+    LOG_FILE.parent.mkdir(parents=True, exist_ok=True)
     file_handler = logging.FileHandler(LOG_FILE)
     file_handler.setFormatter(formatter)
 
@@ -109,6 +87,8 @@ def dispatch_all() -> None:
     if not live_mode:
         logger.info("Safe mode enabled: DISPATCH_LIVE not set; running dry-run only.")
 
+    results: List[DispatchResult] = []
+
     for payload in payloads:
         logger.info(
             "Processing payload %s with intent=%s monetization_hint=%s",
@@ -117,9 +97,16 @@ def dispatch_all() -> None:
             payload.monetization_hint,
         )
         for platform in iter_target_platforms(payload):
-            adapter_class = PLATFORM_ADAPTERS.get(platform)
+            adapter_class = resolve_adapter(platform)
             if not adapter_class:
                 logger.error("FAILED | Unsupported platform: %s", platform)
+                results.append(
+                    DispatchResult(
+                        platform=platform,
+                        status=ResultStatus.FAILED,
+                        message="Unsupported platform",
+                    )
+                )
                 continue
 
             credentials = get_credentials(platform)
@@ -127,19 +114,44 @@ def dispatch_all() -> None:
             payload_dict = payload.to_dict()
             if not adapter.validate(payload_dict):
                 logger.error("FAILED | Validation failed for %s", platform)
+                results.append(
+                    DispatchResult(
+                        platform=platform,
+                        status=ResultStatus.FAILED,
+                        message="Validation failed",
+                    )
+                )
                 continue
             try:
                 response = adapter.dispatch(payload_dict)
             except Exception as exc:  # noqa: BLE001 - ensure graceful handling
                 logger.error("ERROR | Dispatch error on %s: %s", platform, exc)
-            else:
-                logger.info("SUCCESS | %s response: %s", platform, response)
+                response = DispatchResult(
+                    platform=platform,
+                    status=ResultStatus.FAILED,
+                    message=f"Dispatch error: {exc}",
+                )
+            results.append(response)
+            logger.info("%s | %s response: %s", response.status, platform, response.message)
 
             if throttle_seconds > 0:
                 logger.info("Throttling for %s seconds", throttle_seconds)
                 import time
 
                 time.sleep(throttle_seconds)
+
+    print_execution_summary(results)
+
+
+def print_execution_summary(results: List[DispatchResult]) -> None:
+    """Print a final aggregated execution summary."""
+    print("\nExecution Summary")
+    print("=" * 20)
+    if not results:
+        print("No dispatch results recorded.")
+        return
+    for result in results:
+        print(f"{result.platform}: {result.status} - {result.message}")
 
 
 if __name__ == "__main__":

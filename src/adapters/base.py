@@ -6,6 +6,7 @@ from abc import ABC, abstractmethod
 from pathlib import Path
 from typing import Any, Dict, Iterable, Tuple
 
+from src.runtime.results import DispatchResult, ResultStatus
 
 class BaseAdapter(ABC):
     """Base adapter with shared validation and credential handling."""
@@ -14,6 +15,7 @@ class BaseAdapter(ABC):
     MAX_TEXT_LENGTH: int = 0
     REQUIRED_FIELDS: Tuple[str, ...] = ()
     MEDIA_KEYS: Tuple[str, ...] = ("image_file", "video_file", "audio_file")
+    REQUIRE_TEXT: bool = False
 
     def __init__(self, credentials: Dict[str, str | None], logger, live_mode: bool) -> None:
         self.credentials = credentials
@@ -23,8 +25,12 @@ class BaseAdapter(ABC):
     def validate(self, payload: Dict[str, Any]) -> bool:
         content = payload.get("payload", {})
         text = str(content.get("text", "")).strip()
-        if not text:
+        has_media = any(content.get(key) for key in self.MEDIA_KEYS)
+        if self.REQUIRE_TEXT and not text:
             self.logger.error("ERROR | %s requires text content.", self.PLATFORM)
+            return False
+        if not text and not has_media:
+            self.logger.error("ERROR | %s requires text or media content.", self.PLATFORM)
             return False
         if self.MAX_TEXT_LENGTH and len(text) > self.MAX_TEXT_LENGTH:
             self.logger.error("ERROR | %s text exceeds limit.", self.PLATFORM)
@@ -49,15 +55,10 @@ class BaseAdapter(ABC):
             return False
         return True
 
-    def _dry_run_response(self, detail: str, payload: Dict[str, Any]) -> Dict[str, Any]:
-        return {
-            "status": "SUCCESS",
-            "detail": f"DRY_RUN: {detail}",
-            "payload": payload.get("payload", {}),
-            "monetization_hint": payload.get("monetization_hint"),
-        }
+    def _result(self, status: str, message: str) -> DispatchResult:
+        return DispatchResult(platform=self.PLATFORM, status=status, message=message)
 
     @abstractmethod
-    def dispatch(self, payload: Dict[str, Any]) -> Dict[str, Any]:
+    def dispatch(self, payload: Dict[str, Any]) -> DispatchResult:
         """Dispatch content to the target platform."""
         raise NotImplementedError

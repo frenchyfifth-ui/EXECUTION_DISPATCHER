@@ -6,6 +6,7 @@ from importlib.util import find_spec
 from typing import Any, Dict
 
 from src.adapters.base import BaseAdapter
+from src.runtime.results import ResultStatus
 
 
 class LinkedInAdapter(BaseAdapter):
@@ -15,24 +16,20 @@ class LinkedInAdapter(BaseAdapter):
     MAX_TEXT_LENGTH = 3000
     REQUIRED_FIELDS = ("access_token",)
 
-    def dispatch(self, payload: Dict[str, Any]) -> Dict[str, Any]:
-        if not self.live_mode:
-            return self._dry_run_response("Ready to post to LinkedIn.", payload)
+    def dispatch(self, payload: Dict[str, Any]):
         if not self._require_credentials():
-            return {
-                "status": "ERROR",
-                "detail": "Missing LinkedIn credentials. Set LINKEDIN_ACCESS_TOKEN.",
-            }
+            return self._result(
+                ResultStatus.FAILED,
+                "Missing LinkedIn credentials. Set LINKEDIN_ACCESS_TOKEN.",
+            )
 
         if not find_spec("linkedin_api"):
-            return {
-                "status": "ERROR",
-                "detail": "linkedin-api is not installed. Install it to dispatch to LinkedIn.",
-            }
+            return self._result(
+                ResultStatus.FAILED,
+                "linkedin-api is not installed. Install it to dispatch to LinkedIn.",
+            )
 
-        return {
-            "status": "SUCCESS",
-            "detail": "Ready to post to LinkedIn via linkedin-api (configure API calls).",
-            "payload": payload.get("payload", {}),
-            "monetization_hint": payload.get("monetization_hint"),
-        }
+        return self._result(
+            ResultStatus.NOT_IMPLEMENTED,
+            "LinkedIn dispatch not implemented. Integrate linkedin-api calls.",
+        )
