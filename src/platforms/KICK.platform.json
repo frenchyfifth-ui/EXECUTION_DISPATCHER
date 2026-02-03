@@ -1,0 +1,9 @@
+{
+  "platform": "KICK",
+  "description": "Stub configuration for KICK platform.",
+  "limits": {
+    "text": null,
+    "video": null,
+    "image": null
+  }
+}

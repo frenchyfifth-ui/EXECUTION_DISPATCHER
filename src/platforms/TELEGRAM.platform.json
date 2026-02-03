@@ -1,0 +1,9 @@
+{
+  "platform": "TELEGRAM",
+  "description": "Stub configuration for TELEGRAM platform.",
+  "limits": {
+    "text": null,
+    "video": null,
+    "image": null
+  }
+}

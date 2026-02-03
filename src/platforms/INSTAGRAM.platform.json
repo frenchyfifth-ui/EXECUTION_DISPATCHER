@@ -1,0 +1,9 @@
+{
+  "platform": "INSTAGRAM",
+  "description": "Stub configuration for INSTAGRAM platform.",
+  "limits": {
+    "text": null,
+    "video": null,
+    "image": null
+  }
+}

@@ -1,0 +1,9 @@
+{
+  "platform": "TIKTOK",
+  "description": "Stub configuration for TIKTOK platform.",
+  "limits": {
+    "text": null,
+    "video": null,
+    "image": null
+  }
+}
