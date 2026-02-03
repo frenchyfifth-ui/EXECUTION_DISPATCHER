@@ -1,0 +1,9 @@
+{
+  "platform": "YOUTUBE",
+  "description": "Stub configuration for YOUTUBE platform.",
+  "limits": {
+    "text": null,
+    "video": null,
+    "image": null
+  }
+}

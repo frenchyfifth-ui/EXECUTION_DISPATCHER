@@ -1,0 +1,9 @@
+{
+  "platform": "PINTEREST",
+  "description": "Stub configuration for PINTEREST platform.",
+  "limits": {
+    "text": null,
+    "video": null,
+    "image": null
+  }
+}
