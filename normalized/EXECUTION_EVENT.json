@@ -1,0 +1,10 @@
+{
+  "event_id": "event-001",
+  "intent": "authority_post",
+  "payload": {
+    "text": "One intent. Multiple platforms. Execution beats noise."
+  },
+  "target_platforms": ["X", "LINKEDIN"],
+  "simultaneity_window": "NOW",
+  "monetization_hint": "AUTHORITY"
+}
