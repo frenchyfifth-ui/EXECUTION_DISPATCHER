@@ -1,0 +1,9 @@
+{
+  "platform": "SNAPCHAT",
+  "description": "Stub configuration for SNAPCHAT platform.",
+  "limits": {
+    "text": null,
+    "video": null,
+    "image": null
+  }
+}

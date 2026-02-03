@@ -1,0 +1,9 @@
+{
+  "platform": "LINKEDIN",
+  "description": "Stub configuration for LINKEDIN platform.",
+  "limits": {
+    "text": null,
+    "video": null,
+    "image": null
+  }
+}

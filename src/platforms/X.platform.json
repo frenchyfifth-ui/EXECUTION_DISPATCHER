@@ -1,0 +1,9 @@
+{
+  "platform": "X",
+  "description": "Stub configuration for X platform.",
+  "limits": {
+    "text": null,
+    "video": null,
+    "image": null
+  }
+}

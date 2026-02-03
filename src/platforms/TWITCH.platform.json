@@ -1,0 +1,9 @@
+{
+  "platform": "TWITCH",
+  "description": "Stub configuration for TWITCH platform.",
+  "limits": {
+    "text": null,
+    "video": null,
+    "image": null
+  }
+}
