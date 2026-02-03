@@ -1,0 +1,14 @@
+{
+  "X": {
+    "enabled": true,
+    "category": "FAST_ATTENTION"
+  },
+  "LINKEDIN": {
+    "enabled": true,
+    "category": "AUTHORITY"
+  },
+  "YOUTUBE": {
+    "enabled": false,
+    "category": "SLOW_ASSET"
+  }
+}
